@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<!-- html macro 组件引用 -->
+{% import 'macro_template/macro_template.html' as macro_template %}
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8">
+    <meta name="csrf-token" content="test">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <title>
+        {% block title %}
+            晶云
+        {% endblock %}
+    </title>
+
+    {% set css_list = [
+    "bootstrap/css/bootstrap.min.css",
+    "bootstrap-table/bootstrap-table.min.css",
+    "jQuery-Form-Validator/form-validator/theme-default.css",
+    "toastr/toastr.css", "css/admin-master.css",
+    "bootstrap-select/dist/css/bootstrap-select.min.css",
+    "bootstrap-menu/docs/css/font-awesome.css",
+    "css/form_validate.css",
+    "sweet-alert/sweetalert.css",] %}
+
+    {% for css_file in css_list %}
+        {{ macro_template.css(css_file) }}
+    {% endfor %}
+
+    {% set js_list = ["jquery/jquery-2.1.1.min.js",
+    "jquery/jquery-ui.min.js",
+    "bootstrap/js/bootstrap.min.js",
+    "bootstrap-table/bootstrap-table.js",
+    "bootstrap-table/extensions/multiple-search/bootstrap-table-multiple-search.js",
+    "bootstrap-table/locale/bootstrap-table-zh-CN.js",
+    "bootstrap-select/dist/js/bootstrap-select.min.js",
+    "bootstrap-select/dist/js/i18n/defaults-zh_CN.min.js",
+    "bootstrap-menu/dist/BootstrapMenu.min.js",
+    "jQuery-Form-Validator/form-validator/jquery.form-validator.js",
+    "d3/d3.min.js",
+    "toastr/toastr.js"] %}
+
+    {% for js_file in js_list %}
+        {{ macro_template.script(js_file) }}
+    {% endfor %}
+
+    {% set div_js_list = ["canvg/rgbcolor.js",
+    "canvg/StackBlur.js", "canvg/canvg.js",
+    "sweet-alert/sweetalert2.all.js", "html_to_canvas/html2canvas.js",
+    "html_to_canvas/html2canvas.js", "underscore/underscore.js", "backbone/backbone.js",
+    "FileSaver/FileSaver.js", "TableExport/js/tableexport.js"] %}
+    {% for js_file in div_js_list %}
+        {{ macro_template.script(js_file) }}
+    {% endfor %}
+
+    {% set div_js_list = ["system/js/jingyun.js"] %}
+    {% for js_file in div_js_list %}
+        {% if "Development" in env %}
+            {{ macro_template.secure_script_random(js_file) }}
+        {% else %}
+            {{ macro_template.secure_script_random(js_file|replace(".js", ".min.js")) }}
+        {% endif %}
+    {% endfor %}
+</head>
+<body>
+
+<div class="container-fluid">
+    {% block content %}
+        <div id="system_con">
+
+        </div>
+
+    {% endblock %}
+</div>
+
+<!-- footer 版权开始 -->
+{% block footer %}
+
+{% endblock %}
+<script type="text/javascript">
+
+    $.ajaxSetup({cache: false});
+    //无论何时你发送 AJAX POST 请求，为其添加 X-CSRFToken 标头:  ==start==
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
+                xhr.setRequestHeader("X-CSRFToken", 'test');
+            }
+        },
+        global: true
+    });
+    //无论何时你发送 AJAX POST 请求，为其添加 X-CSRFToken 标头:  == end ==
+
+    $(document).on("show.bs.modal", ".modal", function () {
+        $(this).draggable({revert: true}); // 莫泰狂客拖动
+    });
+</script>
+</body>
+</html>

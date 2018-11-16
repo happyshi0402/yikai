@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Docker{% endblock %}
+{% block content %}
+    <div>
+        {{ sql3}}
+        {{ macro_template.show_table("id3", "table2", data3) }}
+        {{ sql4 }}
+        {{ macro_template.show_table("id4", "table2", data4) }}
+
+        {{ sql }}
+        {{ macro_template.show_table("id", "table", data) }}
+
+        {{ sql2 }}
+        {{ macro_template.show_table("id2", "table2", data2) }}
+    </div>
+{% endblock %}

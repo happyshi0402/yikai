@@ -1,0 +1,202 @@
+{% macro modal(id, class, title) -%}
+    <div class="modal fade bs-example-modal-lg {{ class }}" id="{{ id }}" tabindex="-1" role="dialog"
+         aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">{{ title }}</h4>
+                </div>
+                <div class="modal-body" id="modal_con_{{ id }}">
+                    {#                    {{ modal_con }}#}
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+{%- endmacro %}
+
+
+{% macro search_box(id, class, placeholder, click) -%}
+    <div class="system_search col-sm-2">
+        <input type="text" id="{{ id }}"
+               class="form-control {{ class }}"
+               onpropertychange="{{ click }}"
+               oninput="{{ click }}"
+               placeholder="{{ placeholder }}"/>
+        <span class="glyphicon glyphicon-search"></span>
+    </div>
+{%- endmacro %}
+{% macro form_horizontal_create(id, class, form_columns, btn_name, btn_click) -%}
+    <!-- 表单的创建 -->
+
+    <div class="{{ class }}">
+        <style>
+            .jy_warning {
+                color: green !important;
+                z-index: 1000;
+                line-height: 30px;
+                padding-left: 3px;
+            }
+            .jy_error {
+                color: red !important;
+                z-index: 1000;
+                line-height: 30px;
+                padding-left: 3px;
+            }
+        </style>
+        <span class="jy_warning" id="jy_form_waring"></span>
+        <span class="jy_error" id="jy_form_error"></span>
+        <!-- 表单的类的名字不能是 childrens， childrens 代表子表单 -->
+        <form class="form-horizontal" id="{{ id }}" role="form" onsubmit="return false;">
+
+            {% for item in form_columns %}
+                {% set id = item["field"] %}
+                {% set class = item["class"] %}
+                {% set label = item["title"] %}
+                {% set type = item["type"] %}
+
+                {% if type == "text" or type == "password" %}
+                    {% set placeholder = item["placeholder"] %}
+                    {% set regex = item["regex"] %}
+                    {% set length = item["length"] %}
+
+                    {% set help = item["help"] %}
+                    {% set regex = item["regex"] %}
+                    {% set validate = item["validate"] %}
+                    {% set validation_url = item["validation-url"] %}
+                    {% set validation_param_name = item["validation-param-name"] %}
+                    {% set validation_method = item["validation-method"] %}
+                    {% set validation_message = item["validation-message"] %}
+
+                    <div class="form-group">
+                        <label for="{{ id }}" class="col-sm-2 control-label">{{ label }}:</label>
+                        <div class="{{ class }}">
+                            <input type="{{ type }}"
+                                   class="form-control admin_input" id="{{ id }}"
+                                   placeholder="{{ placeholder }}"
+                                   data-validation="{{ validate }}"
+                                   data-validation-length="{{ length }}"
+                                    {% if regex %}
+                                        {% if regex != "" %}
+                                   data-validation-regex="{{ regex }}"
+                                        {% endif %}
+                                    {% endif %}
+                                    {% if validation_url %}
+                                   data-validation-url="{{ validation_url }}"
+                                    {% endif %}
+                                    {% if validation_param_name %}
+                                   data-validation-param-name="{{ validation_param_name }}"
+                                    {% endif %}
+                                    {% if validation_method %}
+                                   data-validation-method="{{ validation_method }}"
+                                    {% endif %}
+                                    {% if validation_message %}
+                                   data-validation-message="{{ validation_message }}"
+                                    {% endif %}
+                                   data-validation-help="{{ help }}"
+                                   data-validation-error-msg="{{ help }}"
+                            >
+                        </div>
+                    </div>
+                {% elif type == "textarea" %}
+                    {% set placeholder = item["placeholder"] %}
+                    {% set regex = item["regex"] %}
+                    {% set length = item["length"] %}
+
+                    {% set help = item["help"] %}
+                    {% set regex = item["regex"] %}
+                    {% set validate = item["validate"] %}
+                    {% set row = item["row"] %}
+
+                    <div class="form-group">
+                        <label for="{{ id }}" class="col-sm-2 control-label">{{ label }}:</label>
+                        <div class="{{ class }}">
+                            <textarea class="form-control" id="{{ id }}" rows="{{ row }}"></textarea>
+                            <span class="hide">剩余<span id="{{ id }}_max">{{ length }}</span>个字符</span>
+                            <script>
+                                var id = '{{ id }}';
+                                var max_length = {{ length }};
+                                $('#' + id + '').restrictLength($('#' + id + '_max'));
+                            </script>
+                        </div>
+                    </div>
+                {% elif type == "select" %}
+                    {% set options = item["options"] %}
+                    {% set onchange = item["onchange"] %}
+                    {% set has_checkbox = item["has_checkbox"] %}
+                    <div class="form-group">
+                        <label for="{{ id }}" class="col-sm-2 control-label">{{ label }}:</label>
+                        <div class="{{ class }}" id="div_{{ id }}">
+                            {% if options != "" %}
+                                <select class="selectpicker show-tick form-control"
+                                        id="{{ id }}" name="{{ id }}" onchange="{{ onchange }}">
+                                    {% for option in options %}
+                                        {% set option_value = options["value"] %}
+                                        {% set option_id = options["option_id"] %}
+                                        <option id="{{ option_id }}">{{ option_value }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if has_checkbox %}
+                        {% if has_checkbox == "show" %}
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10 checkbox_{{ id }}">
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+
+                {% elif type == "button" %}
+                    {% set click = item["click"] %}
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <div class="row col-sm-12">
+                                <span class="btn btn-info {{ class }}" id="{{ id }}"
+                                      onclick="{{ click }}">{{ label }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% elif type == "checkbox" %}
+                    {% set check_dict = item["check_dict"] %}
+                    {% for check_item in check_dict %}
+                        {% set check_id = check_item[0] %}
+                        {% set check_name = check_item[1] %}
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 {{ class }}">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="{{ check_id }}"> {{ check_name }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% elif type == "list" %}
+
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10 children_forms">
+                        </div>
+                    </div>
+
+                    <script>
+                        eval('{{ item["auto_run"] }}');
+                    </script>
+                {% endif %}
+            {% endfor %}
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-info submit" onclick="{{ btn_click }}">{{ btn_name }}</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{%- endmacro %}
+
+

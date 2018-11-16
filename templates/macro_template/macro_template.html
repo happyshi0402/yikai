@@ -1,0 +1,302 @@
+{% set random_list = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] %}
+
+
+{% macro script_random(file_path) -%}
+    <script type="text/javascript" src="{{ url_for('static', filename=file_path) }}?r={{ random_list|random }}"></script>
+{%- endmacro %}
+
+{% macro secure_script_random(file_path) -%}
+    <script type="text/javascript" src="/secure/static/js/?js_path={{ file_path }}&r={{ random_list|random }}"></script>
+{%- endmacro %}
+
+{% macro css_random(file_path) -%}
+    <link rel="stylesheet" href="{{ url_for('static', filename=file_path) }}?r={{ random_list|random }}">
+{%- endmacro %}
+
+{% macro script(file_path) -%}
+    <script type="text/javascript" src="{{ url_for('static', filename=file_path) }}"></script>
+{%- endmacro %}
+
+{% macro css(file_path) -%}
+    <link rel="stylesheet" href="{{ url_for('static', filename=file_path) }}">
+{%- endmacro %}
+
+{% macro download_moudle_resourse() -%}
+    {{ css("file_download/TableExport/css/tableexport.min.css") }}
+    {% set div_js_list = ["file_download/js_xlsx/xlsx.core.min.js",
+    "file_download/Blob/Blob.min.js",
+    "file_download/FileSaver/FileSaver.min.js",
+    "file_download/TableExport/js/tableexport.min.js",] %}
+    {% for js_file in div_js_list %}
+        {{ script(js_file) }}
+    {% endfor %}
+{%- endmacro %}
+
+{% macro breadcrumb(class, breadcrumb_list) -%}
+    {#    <ol class="breadcrumb row">#}
+    {#        <li><a href="/project/list/" target="_self">项目</a></li>#}
+    {#        <li class="active"><a href="#">{{ project_no }}:{{ project_name }}</a></li>#}
+    {#    </ol>#}
+    {#    breadcrumb_list = [["href", "target", "breadcrumb_con", "class"],#}
+    <ol class="breadcrumb row {{ class }}" xmlns="http://www.w3.org/1999/html">
+        {% for item in breadcrumb_list[1:] %}
+            <li class="{{ item[3] }}"><a href="{{ item[0] }}" target="{{ item[1] }}">{{ item[2] }}</a></li>
+        {% endfor %}
+    </ol>
+{%- endmacro %}
+
+
+{% macro nav_tabs(class, style, tab_con_list, system_help=False) -%}
+    {#    {% set tab_con_list = [["id", "style", "onclick", "tab_con", "class"],#}
+    <style>
+    .tooltip-inner{
+        width: 300px;
+    }
+    </style>
+    <ul class="nav nav-tabs {{ class }}" role="tablist"
+        style="{{ style }}">
+        {% for item in tab_con_list[1:] %}
+            <li role="presentation" class="{{ item[4] }}" style="{{ item[1] }}">
+                <a href="{{ item[0] }}"
+                           aria-controls="data_single"
+                           role="tab"
+                           data-toggle="tab" onclick="{{ item[2] }}">{{ item[3] }}
+                    {% if system_help %}
+                        <img src="{{ url_for("static", filename="images/system/help.png") }}"
+                             style="display: inline-block" data-html="true"
+                             data-templates='<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+                             data-toggle="tooltip" data-placement="top" title="{{ item[5]}}"/>
+                        </a>
+                        <script>
+                        $(function () {
+                          $('[data-toggle="tooltip"]').tooltip();
+                        })
+                        </script>
+                    {% endif %}
+                </a>
+            </li>
+        {% endfor %}
+        {#        <li role="presentation" style="margin-left: 10px;">#}
+        {#            <a href="#data_double"#}
+        {#               aria-controls="data_double"#}
+        {#               role="tab"#}
+        {#               data-toggle="tab" onclick="project_data.setTab(2)">扩展模式</a>#}
+        {#        </li>#}
+    </ul>
+{%- endmacro %}
+
+{% macro list_table(list_value) -%}
+    <table class="table table-bordered" style="background-color: #008803">
+        <thead>
+        {% for th_con in list_value[0] %}
+            <th>{{ th_con|string }}</th>
+        {% endfor %}
+        </thead>
+        <tbody>
+        <tr>
+            {% for row_con in list_value[1:] %}
+                {% for td_con in row_con %}
+                    <td>
+                        {{ td_con }}
+                    </td>
+                {% endfor %}
+            {% endfor %}
+        </tr>
+        </tbody>
+    </table>
+{%- endmacro %}
+
+
+{% macro file_download_table(list_value, account) -%}
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            {% if account != "wangshifengg" %}
+                {% for th_con in list_value[0] %}
+                    {%- if loop.index ==2 or loop.index ==3 or loop.index ==6 %}
+                        {% continue %}
+                    {% endif %}
+                    <td>{{ th_con|string }}</td>
+                {% endfor %}
+            {% else %}
+                <td>
+                    {{ list_value[0]|join("</td><td>")|safe }}
+                </td>
+            {% endif %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for row_con in list_value[1:] %}
+            {% if account != "wangshifengg" %}
+                {%- if "fastqc_out" in row_con[2] %}
+                    {% continue %}
+                {% endif %}
+            {% endif %}
+            <tr class="download_id_{{ row_con[0] }}">
+                {% if account != "wangshifengg" %}
+                    {% for td_con in row_con %}
+                        {%- if loop.index ==2 or loop.index ==3 or loop.index ==6 %}
+                            {% continue %}
+                        {% endif %}
+                        <td>
+                            {{ td_con }}
+                        </td>
+                    {% endfor %}
+                {% else %}
+                    <td>
+                        {{ row_con|join("</td><td>")|safe }}
+                    </td>
+                {% endif %}
+                <td>
+                    <button class="btn btn-success"
+                            onclick="down_load_code_result_file('{{ row_con[0] }}', '{{ row_con[2] }}', '{{ row_con[3] }}',
+                                    '{{ row_con[4] }}', '{{ row_con[5] }}')">下载
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+    <script>
+        function down_load_code_result_file(file_id, file_path, file_name, file_size, file_key) {
+            function create_input(input_name, input_vlaue) {
+                var input1 = $("<input>");
+                input1.attr("type", "hidden");
+                input1.attr("name", input_name);
+                input1.attr("id", input_name);
+                input1.attr("value", input_vlaue);
+                return input1;
+            }
+
+            // 对Date的扩展，将 Date 转化为指定格式的String
+            Date.prototype.format = function (format) {
+                var o = {
+                    "M+": this.getMonth() + 1, //month
+                    "d+": this.getDate(), //day
+                    "h+": this.getHours(), //hour
+                    "m+": this.getMinutes(), //minute
+                    "s+": this.getSeconds(), //second
+                    "q+": Math.floor((this.getMonth() + 3) / 3), //quarter
+                    "S": this.getMilliseconds() //millisecond
+                }
+
+                if (/(y+)/.test(format)) {
+                    format = format.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+                }
+
+                for (var k in o) {
+                    if (new RegExp("(" + k + ")").test(format)) {
+                        format = format.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+                    }
+                }
+                return format;
+            };
+            var down_load_time = new Date().format("yyyy-M-d hh:mm:ss");
+            $(".download_id_" + file_id + " td:eq(6)").text(down_load_time);
+            var code_result_file = $("#code_result_file").val();
+            if (code_result_file != "") {
+                var form = $("<form>");//定义一个form表单
+                form.attr("style", "display:none");
+                form.attr("target", "");
+                form.attr("method", "post");
+                form.attr("action", "/gene/download/quality/file/");
+
+                var csrf_token = create_input("csrf_token", $('meta[name=csrf-token]').attr('content'));
+                form.append(csrf_token);
+                var file_path = create_input("file_path", file_path);
+                form.append(file_path);
+                var file_name = create_input("file_name", file_name);
+                form.append(file_name);
+                var file_key = create_input("file_key", file_key);
+                form.append(file_key);
+                var file_size = create_input("file_size", file_size);
+                form.append(file_size);
+                $("body").append(form);//将表单放置在web中
+                form.submit();//表单提交
+            }
+        }
+    </script>
+{%- endmacro %}
+
+{% macro create_form(dict_name, botton_name, url) -%}
+    <form class="form-horizontal" role="form">
+        {% for input_name in dict_name %}
+
+            <div class="form-group">
+            {% if dict_name[input_name][1] == "text" %}
+                <label for="{{ input_name }}" class="col-sm-2 control-label">{{ dict_name[input_name][0] }}</label>
+
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="{{ input_name }}" name="{{ input_name }}"
+                           placeholder="请输入{{ dict_name[input_name][0] }}">
+                </div>
+            {% elif dict_name[input_name][1] == "select" %}
+                <label for="{{ input_name }}" class="col-sm-2 control-label">{{ dict_name[input_name][0] }}</label>
+
+                <div class="col-sm-10">
+                    <select id="{{ input_name }}" name="{{ input_name }}">
+                        {% for option_key in dict_name[input_name][2] %}
+                            <option value="{{ option_key }}">{{ dict_name[input_name][2][option_key] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% elif dict_name[input_name][1] == "textarea" %}
+                <label for="{{ input_name }}" class="col-sm-2 control-label">{{ dict_name[input_name][0] }}</label>
+
+                <div class="col-sm-10">
+                <textarea class="form-control" id="{{ input_name }}"
+                          name="{{ input_name }}" placeholder="请输入{{ dict_name[input_name][0] }}"></textarea>
+                </div>
+            {% elif dict_name[input_name][1] == "textarea" %}
+                <label for="{{ input_name }}" class="col-sm-2 control-label">{{ dict_name[input_name][0] }}</label>
+
+                <div class="col-sm-offset-2 col-sm-10">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox">{{ dict_name[input_name][0] }}
+                        </label>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-default">{{ botton_name }}</button>
+            </div>
+        </div>
+    </form>
+{%- endmacro %}
+
+{% macro input_error_span(input_id) -%}
+    <div class="form-group">
+    <span id="{{ input_id }}_error" class="input_error glyphicon glyphicon-info-sign" style="display: none">
+
+    </span>
+    </div>
+{%- endmacro %}
+
+{% macro show_table(id, class, data) -%}
+    <!-- 表单的创建 -->
+    <table id="{{ id }}" data-toggle="table"
+            class="table bootstrap-table table-bordered {{ class }}">
+        <thead>
+            <tr class="fixed-table-header">
+                {% for col in data[0] %}
+                    <th data-field="{{ col }}"
+                        data-event="action_event">{{ col }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in data %}
+            <tr>
+                {% for col in item %}
+                    <td class="{{ col }}">{{ item[col] }} </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{%- endmacro %}
