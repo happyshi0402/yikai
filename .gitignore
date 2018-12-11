@@ -1,0 +1,12 @@
+*~
+.idea
+.*.sw?
+*.log
+*.log.[1-9]
+*.pem
+.localrc.auto
+.localrc.password
+.prereqs
+.tox
+.stackenv
+*.pyc
