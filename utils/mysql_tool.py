@@ -36,12 +36,15 @@ class my_mysql():
         except AttributeError:
             logging.error("No connect method found in self.driver module")
 
-    def my_fetchall(self, sql, args=None):
+    def my_fetchall(self, sql, args=None, return_type=None):
         rows = []
         try:
             con = self._connect()
             try:
-                cur = con.cursor(MySQLdb.cursors.DictCursor)
+                if return_type == "dict":
+                    cur = con.cursor(MySQLdb.cursors.DictCursor)
+                else:
+                    cur = con.cursor()
                 if type(sql) is str:
                     if ";" not in sql:
                         logging.warn('mysql_toool.my_fetchall: sql not end with \";\";')
@@ -68,12 +71,15 @@ class my_mysql():
             rows = []
         return rows
 
-    def my_fetchone(self, sql, args=None):
+    def my_fetchone(self, sql, args=None, return_type=None):
         row = []
         try:
             con = self._connect()
             try:
-                cur = con.cursor()
+                if return_type == "dict":
+                    cur = con.cursor(MySQLdb.cursors.DictCursor)
+                else:
+                    cur = con.cursor()
                 if type(sql) is str:
                     if ";" not in sql:
                         logging.warn('mysql_toool.my_fetchone: sql not end with \";\";')
