@@ -10,3 +10,4 @@
 .tox
 .stackenv
 *.pyc
+venv
