@@ -4,13 +4,12 @@
 # @Software: PyCharm
 # @Author : 王世锋
 # @Email：785707939@qq.com
-# @Time：2018/11/16 17:21
+# @Time：2018/12/11 14:52
 # @File : mysql_tool.py
 """
-
 import logging
 import warnings
-import MySQLdb
+import pymysql
 
 warnings.simplefilter("ignore")
 
@@ -18,7 +17,7 @@ __author__ = 'wangshifeng'
 
 
 class my_mysql():
-    driver = MySQLdb
+    driver = pymysql
     """The my_mysql is a tool for mysql connect."""
 
     def __init__(self, host, user, database, password, port=3306, default_character_set="utf-8"):
@@ -42,7 +41,7 @@ class my_mysql():
             con = self._connect()
             try:
                 if return_type == "dict":
-                    cur = con.cursor(MySQLdb.cursors.DictCursor)
+                    cur = con.cursor(self.driver.cursors.DictCursor)
                 else:
                     cur = con.cursor()
                 if type(sql) is str:
@@ -51,7 +50,7 @@ class my_mysql():
                     cur.execute(sql, args)
                     rows = cur.fetchall()
                     rows = [r for r in rows]
-                elif type(sql) is unicode:
+                elif type(sql) is bytes:
                     if ";" not in sql:
                         logging.warn('mysql_toool.my_fetchall: sql not end with \";\";')
                     cur.execute(sql, args)
@@ -61,11 +60,11 @@ class my_mysql():
                     logging.error(
                         'mysql_toool.my_fetchall: sql, execute: cur.execute: '
                         'TypeError: must be string or read-only buffer, not other')
-            except MySQLdb.Error as error:
+            except self.driver.Error as error:
                 logging.error('mysql_toool.my_fetchall: sql:' + str(error))
             finally:
                 con.close()
-        except MySQLdb.Error as error:
+        except self.driver.Error as error:
             logging.error('mysql_toool.my_fetchall: default.cnf error:' + str(error))
         if str(rows) == "[(None,)]":
             rows = []
@@ -94,11 +93,11 @@ class my_mysql():
                     logging.error(
                         'mysql_toool.my_fetchone: sql, execute: cur.execute: '
                         'TypeError: must be string or read-only buffer, not other')
-            except MySQLdb.Error as error:
+            except self.driver.Error as error:
                 logging.error('mysql_toool.my_fetchone: sql:' + str(error))
             finally:
                 con.close()
-        except MySQLdb.Error as error:
+        except self.driver.Error as error:
             logging.error('mysql_toool.my_fetchone: default.cnf error:' + str(error))
         if row is None:
             row = []
@@ -134,12 +133,12 @@ class my_mysql():
                     logging.error(
                         'mysql_toool.execute: sql, execute: cur.execute: '
                         'TypeError: must be string or read-only buffer, not other')
-            except MySQLdb.Error as error:
+            except self.driver.Error as error:
                 logging.error('mysql_toool.execute: sql:' + str(error))
             finally:
                 con.commit()
                 con.close()
-        except MySQLdb.Error as error:
+        except self.driver.Error as error:
             logging.error('mysql_toool.execute: default.cnf error:' + str(error))
         return handled_item
 
@@ -177,13 +176,13 @@ class my_mysql():
                             break
                 else:
                     handled_item = cur.execute(array_sql_action)
-            except MySQLdb.Error as error:
+            except self.driver.Error as error:
                 handled_item = -1
                 con.rollback()
                 logging.error('mysql_toool.execute_transaction: sql: %s : %s' % (sql, str(error)))
             finally:
                 con.commit()
                 con.close()
-        except MySQLdb.Error as error:
+        except self.driver.Error as error:
             logging.error('mysql_toool.execute_transaction: default.cnf error:' + str(error))
         return handled_item
